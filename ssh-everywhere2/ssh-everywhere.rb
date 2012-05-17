@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require 'optparse'
+
 
 def cmd_line()
   options = {}
@@ -20,6 +22,8 @@ def cmd_line()
       options[:max_panes] = s
     end
 
+    opts.on('-t','--tmux-bin [path to bin]','Path to tmux binary.  Defualt=/usr/bin/tmux'
+
   end
 
   optparse.parse!
@@ -27,7 +31,7 @@ def cmd_line()
 end
 
 def get_hosts(opts)
-	contents = IO.readlines(options[:host_list]).map(&:chomp)
+	contents = IO.readlines(opts[:host_list]).map(&:chomp)
 end
 
 def starttmux(opts)
@@ -43,10 +47,26 @@ def starttmux(opts)
 			puts "Adding #{host}"
 			run="#{cmd} split-window -v -t #{session} \'ssh -l %{user} %{host}\'"
 			system(run)
-			tmux select-layout tiled
+			run='tmux select-layout tiled'
+			system(run)
 		end
 		system("#{cmd} set-window-option synchronize-panes on")
 		system("#{cmd} kill-pane -t 0")
 		system("#{cmd} attach -t #{session}")
 	end
+end
+
+def main(options)
+
+	options[:hosts] = get_hosts(options)
+        starttmux(options)
+
+end
+
+	
+
+if __FILE__ == $0
+
+	options = cmd_line()
+	main(options)
 end
