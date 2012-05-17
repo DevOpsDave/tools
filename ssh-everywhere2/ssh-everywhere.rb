@@ -5,7 +5,7 @@ require 'optparse'
 
 def cmd_line()
   options = {}
-  optparse = OptionParser.new do|opts|
+  optparse = OptionParser.new do |opts|
 
     opts.banner = "Usage: #{opts.program_name}"
 
@@ -17,16 +17,30 @@ def cmd_line()
       options[:host_list] = s
     end
 
+    options[:user] = `echo $USER`.chomp
+    opts.on('-u', '--user [USER]', 'The user to login as. Default=<current user>') do |s|
+      options[:user] = s
+    end
+
     options[:max_panes] = 20
     opts.on("-m","--max_panes [INT]","Max number of panes per session.") do |s|
       options[:max_panes] = s
     end
-
-    opts.on('-t','--tmux-bin [path to bin]','Path to tmux binary.  Defualt=/usr/bin/tmux'
+    
+    options[:tmux_bin] = '/usr/bin/tmux'
+    opts.on('-t','--tmux-bin [path to bin]','Path to tmux binary.  Defualt=/usr/bin/tmux') do |s|
+      options[:tmux_bin] = s
+    end
 
   end
 
   optparse.parse!
+
+  # Set the session name if it is not set.
+  if options[:session] == nil
+    options[:session] = options[:host_list].split('/').last.gsub(/\..*$/,'')
+  end
+
   return options
 end
 
@@ -38,6 +52,7 @@ def starttmux(opts)
 	max_pane = opts[:max_panes]
 	host_ary = opts[:hosts]
 	cmd = opts[:tmux_bin]
+  user = opts[:user]
 	session = opts[:session]
 
 	ittr_hosts = host_ary.each_slice(max_pane).to_a
@@ -45,7 +60,7 @@ def starttmux(opts)
 		system("#{cmd} new-session -d -s #{session}")
 		mem_ary.each do |host|
 			puts "Adding #{host}"
-			run="#{cmd} split-window -v -t #{session} \'ssh -l %{user} %{host}\'"
+			run="#{cmd} split-window -v -t #{session} \"ssh -l #{user} #{host}\""
 			system(run)
 			run='tmux select-layout tiled'
 			system(run)
