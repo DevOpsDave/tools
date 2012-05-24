@@ -23,7 +23,7 @@ def cmd_line()
     end
 
     options[:max_panes] = 20
-    opts.on("-m","--max_panes [INT]","Max number of panes per session.") do |s|
+    opts.on("-m","--max_panes [INT]", OptionParser::DecimalInteger, "Max number of panes per session.") do |s|
       options[:max_panes] = s
     end
     
