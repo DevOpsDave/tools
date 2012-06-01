@@ -13,7 +13,7 @@ def cmd_line()
       options[:session] = s
     end
     
-    opts.on("-h","--host_list [STRING]","path to host list.") do |s|
+    opts.on("-l","--host_list [STRING]","path to host list.") do |s|
       options[:host_list] = s
     end
 
@@ -39,6 +39,7 @@ def cmd_line()
   # Set the session name if it is not set.
   if options[:session] == nil
     options[:session] = options[:host_list].split('/').last.gsub(/\..*$/,'')
+    print options[:session]
   end
 
   return options
